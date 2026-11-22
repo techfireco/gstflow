@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: gstflow-app
+    restart: always
+    ports:
+      - "8000"
+    environment:
+      - PYTHONUNBUFFERED=1
