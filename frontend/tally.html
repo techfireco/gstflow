@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce to Tally XML Importer | GSTFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/apple.css">
+</head>
+<body class="bg-[#f5f5f7] text-[#1d1d1f] font-sans antialiased min-h-screen flex flex-col selection:bg-[#0071e3] selection:text-white">
+
+    <!-- Global Nav (44px) -->
+    <header class="sticky top-0 z-50 apple-frosted-nav">
+        <div class="max-w-[1024px] mx-auto px-4 h-11 flex items-center justify-between text-[12px] text-[#1d1d1f]/80">
+            <a href="/" class="flex items-center gap-2 text-[#1d1d1f] font-semibold tracking-tight text-[15px] hover:opacity-80 transition">
+                <i data-lucide="layers" class="w-4 h-4 text-[#0071e3]"></i>
+                <span>GSTFlow</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 font-normal">
+                <a href="/gstr1" class="hover:text-[#0071e3] transition">GSTR-1 Auto-Filer</a>
+                <a href="/tally" class="text-[#0071e3] font-medium">Tally XML Sync</a>
+                <a href="/reconcile" class="hover:text-[#0071e3] transition flex items-center gap-1.5">
+                    <span>2B Reconciler</span>
+                    <span class="text-[10px] bg-[#34c759]/15 text-[#248a3d] font-medium px-2 py-0.5 rounded-full">Free</span>
+                </a>
+                <a href="/pricing" class="hover:text-[#0071e3] transition">Pricing</a>
+            </nav>
+
+            <span class="text-[11px] text-[#86868b]">Tally Prime & ERP 9</span>
+        </div>
+    </header>
+
+    <!-- Sub-Nav Header -->
+    <div class="bg-white/80 backdrop-blur-md border-b border-[#d2d2d7]/50 py-3 px-4">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-[18px] font-semibold tracking-tight text-[#1d1d1f]">Marketplace to Tally XML</h1>
+                <div class="text-[12px] text-[#86868b]">Post sales, return credit notes, and TCS ledgers directly into Tally</div>
+            </div>
+            <span class="text-[11px] bg-[#f5f5f7] border border-[#d2d2d7]/60 text-[#86868b] font-medium px-2.5 py-1 rounded-full">
+                Zero Tally Bloat
+            </span>
+        </div>
+    </div>
+
+    <main class="max-w-[1024px] mx-auto px-4 py-8 flex-1 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Form Card -->
+            <div class="md:col-span-2 apple-card p-6 md:p-8">
+                <h2 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f] mb-6">
+                    Configure & Export Tally XML
+                </h2>
+
+                <form id="tally-form" onsubmit="handleTallySubmit(event)" class="space-y-6">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-1.5">Marketplace</label>
+                            <select id="marketplace" name="marketplace" class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] text-[14px] font-normal focus:bg-white focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none transition" onchange="updateMarketplaceUI()">
+                                <option value="Meesho">Meesho (tcs_sales & return)</option>
+                                <option value="Amazon">Amazon (MTR B2C CSV)</option>
+                                <option value="Flipkart">Flipkart (Sales Report)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-1.5">Tally Company Name</label>
+                            <input type="text" id="company_name" name="company_name" value="IQRA PARVEEN" required class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] text-[14px] font-normal focus:bg-white focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Apple-style Segmented Control for Import Mode -->
+                    <div>
+                        <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-2">Import Architecture</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="apple-card p-4 flex items-start gap-3 cursor-pointer hover:border-[#0071e3]/40 transition border border-[#0071e3] bg-[#0071e3]/[0.02]">
+                                <input type="radio" name="import_mode" value="summary" checked class="mt-1 text-[#0071e3]">
+                                <div>
+                                    <div class="text-[14px] font-semibold text-[#1d1d1f]">State POS Consolidated</div>
+                                    <div class="text-[12px] text-[#86868b] mt-0.5">Groups by state & rate. Recommended to prevent Tally database slowdown.</div>
+                                </div>
+                            </label>
+
+                            <label class="apple-card p-4 flex items-start gap-3 cursor-pointer hover:border-[#0071e3]/40 transition border border-[#d2d2d7]/70">
+                                <input type="radio" name="import_mode" value="detailed" class="mt-1 text-[#0071e3]">
+                                <div>
+                                    <div class="text-[14px] font-semibold text-[#1d1d1f]">Order-by-Order</div>
+                                    <div class="text-[12px] text-[#86868b] mt-0.5">Separate voucher for every single invoice number.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ledger Customization -->
+                    <div class="pt-4 border-t border-[#f0f0f0] space-y-4">
+                        <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider">Tally Ledger Names</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[12px] text-[#86868b] block mb-1">Party / Debtor Ledger</label>
+                                <input type="text" id="party_ledger" name="party_ledger" value="Meesho Sales" class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] text-[13px] font-normal">
+                            </div>
+                            <div>
+                                <label class="text-[12px] text-[#86868b] block mb-1">Sales Ledger Prefix</label>
+                                <input type="text" id="sales_prefix" value="Marketplace Sales" class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] text-[13px] font-normal">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Uploads -->
+                    <div class="pt-4 border-t border-[#f0f0f0] space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider">Upload Reports</label>
+                            <span class="text-[11px] text-[#86868b]">Leave blank to use preloaded October demo files</span>
+                        </div>
+
+                        <div id="meesho-files" class="space-y-2">
+                            <input type="file" name="sales_file" class="w-full text-[12px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                            <input type="file" name="return_file" class="w-full text-[12px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+
+                        <div id="amazon-files" class="hidden">
+                            <input type="file" name="amazon_file" class="w-full text-[12px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="btn-tally" class="apple-btn-primary w-full !py-3">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Generate & Download Tally XML</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidecard: Instructions -->
+            <div class="space-y-6">
+                <div class="apple-card p-6">
+                    <h3 class="font-semibold text-[#1d1d1f] text-[15px] mb-4 flex items-center gap-2">
+                        <i data-lucide="book-open" class="w-4 h-4 text-[#0071e3]"></i>
+                        <span>How to Import in Tally Prime</span>
+                    </h3>
+                    <ol class="space-y-3.5 text-[13px] text-[#86868b] list-decimal list-inside leading-relaxed">
+                        <li>Download the generated <span class="font-mono text-[#1d1d1f] bg-[#f5f5f7] px-1.5 py-0.5 rounded">.xml</span> file.</li>
+                        <li>Open <span class="text-[#1d1d1f] font-medium">Tally Prime</span> and open your company.</li>
+                        <li>Press <span class="font-mono text-[#0071e3] bg-[#0071e3]/10 px-2 py-0.5 rounded font-semibold">Alt + O</span> (or click <strong>Import</strong> on top menu).</li>
+                        <li>Select <span class="text-[#1d1d1f] font-medium">Transactions</span>.</li>
+                        <li>Select File Format: <span class="text-[#1d1d1f] font-medium">XML</span> and select the downloaded file.</li>
+                        <li>Press <span class="text-[#1d1d1f] font-medium">Enter</span>. All Sales, Credit Notes, and GST ledgers are imported instantly.</li>
+                    </ol>
+                </div>
+
+                <div class="apple-card p-6 bg-[#fafafc]">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-[#0071e3] mb-1">Section 52 TCS</div>
+                    <h4 class="font-semibold text-[15px] text-[#1d1d1f]">Automated TCS Asset Ledger</h4>
+                    <p class="text-[13px] text-[#86868b] mt-2 leading-relaxed">
+                        TCS deducted by Amazon or Meesho is booked directly into your "TCS Receivable" ledger, ensuring your accounting ledger matches your GST Portal cash ledger.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#f5f5f7] border-t border-[#d2d2d7]/50 text-[#86868b] text-[12px] py-8 px-4 mt-auto">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>GSTFlow · E-Commerce GST Compliance Engine</div>
+            <div class="flex gap-4">
+                <a href="/gstr1" class="hover:text-[#1d1d1f]">GSTR-1</a>
+                <a href="/tally" class="hover:text-[#1d1d1f]">Tally</a>
+                <a href="/reconcile" class="hover:text-[#1d1d1f]">2B Reconciler</a>
+                <a href="/pricing" class="hover:text-[#1d1d1f]">Pricing</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function updateMarketplaceUI() {
+            const mp = document.getElementById('marketplace').value;
+            const meeshoDiv = document.getElementById('meesho-files');
+            const amazonDiv = document.getElementById('amazon-files');
+            const partyInput = document.getElementById('party_ledger');
+
+            if (mp === 'Meesho') {
+                meeshoDiv.classList.remove('hidden');
+                amazonDiv.classList.add('hidden');
+                partyInput.value = 'Meesho Sales';
+            } else if (mp === 'Amazon') {
+                meeshoDiv.classList.add('hidden');
+                amazonDiv.classList.remove('hidden');
+                partyInput.value = 'Amazon Sales';
+            } else {
+                meeshoDiv.classList.remove('hidden');
+                amazonDiv.classList.add('hidden');
+                partyInput.value = 'Flipkart Sales';
+            }
+        }
+
+        async function handleTallySubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-tally');
+            btn.innerHTML = `<span class="animate-spin inline-block mr-2">⏳</span> Generating XML...`;
+            btn.disabled = true;
+
+            const form = document.getElementById('tally-form');
+            const formData = new FormData(form);
+
+            try {
+                const res = await fetch('/api/convert-tally-xml', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error('Failed to generate Tally XML');
+                
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${formData.get('marketplace')}_Tally_Import.xml`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i> Generate & Download Tally XML`;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

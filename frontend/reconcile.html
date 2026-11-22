@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free GSTR-2B vs Books Reconciler | GSTFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/apple.css">
+</head>
+<body class="bg-[#f5f5f7] text-[#1d1d1f] font-sans antialiased min-h-screen flex flex-col selection:bg-[#0071e3] selection:text-white">
+
+    <!-- Global Nav (44px) -->
+    <header class="sticky top-0 z-50 apple-frosted-nav">
+        <div class="max-w-[1024px] mx-auto px-4 h-11 flex items-center justify-between text-[12px] text-[#1d1d1f]/80">
+            <a href="/" class="flex items-center gap-2 text-[#1d1d1f] font-semibold tracking-tight text-[15px] hover:opacity-80 transition">
+                <i data-lucide="layers" class="w-4 h-4 text-[#0071e3]"></i>
+                <span>GSTFlow</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 font-normal">
+                <a href="/gstr1" class="hover:text-[#0071e3] transition">GSTR-1 Auto-Filer</a>
+                <a href="/tally" class="hover:text-[#0071e3] transition">Tally XML Sync</a>
+                <a href="/reconcile" class="text-[#248a3d] font-medium flex items-center gap-1.5">
+                    <span>2B Reconciler</span>
+                    <span class="text-[10px] bg-[#34c759]/15 text-[#248a3d] font-medium px-2 py-0.5 rounded-full">Free</span>
+                </a>
+                <a href="/pricing" class="hover:text-[#0071e3] transition">Pricing</a>
+            </nav>
+
+            <span class="text-[11px] text-[#248a3d] font-semibold">100% Free Funnel</span>
+        </div>
+    </header>
+
+    <!-- Sub-Nav Header -->
+    <div class="bg-white/80 backdrop-blur-md border-b border-[#d2d2d7]/50 py-3 px-4">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-[18px] font-semibold tracking-tight text-[#1d1d1f]">GSTR-2B vs Books Reconciler</h1>
+                <div class="text-[12px] text-[#86868b]">Protect your Input Tax Credit under Rule 36(4)</div>
+            </div>
+            <div>
+                <button onclick="loadMockReconciliation()" class="apple-btn-secondary !py-1.5 !px-4 !text-[13px] !bg-white hover:!bg-[#e8e8ed] shadow-sm">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#34c759]"></i>
+                    <span>Try Demo Reconciliation (1-Click)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-[1024px] mx-auto px-4 py-8 flex-1 w-full space-y-8">
+        
+        <!-- Upload Form Card -->
+        <div class="apple-card p-6 md:p-8">
+            <h2 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f] mb-5">
+                Upload Purchase Register & GSTR-2B
+            </h2>
+
+            <form id="reconcile-form" onsubmit="handleReconcileSubmit(event)" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Purchase Register -->
+                    <div class="p-6 rounded-[16px] border border-[#d2d2d7]/70 bg-[#fafafc] hover:bg-white transition">
+                        <div class="w-9 h-9 rounded-full bg-[#34c759]/10 text-[#248a3d] flex items-center justify-center font-bold mb-3">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                        </div>
+                        <h3 class="text-[15px] font-semibold text-[#1d1d1f]">1. Purchase Register (Books)</h3>
+                        <p class="text-[12px] text-[#86868b] mt-1 mb-4">Export from Tally Prime, Busy, Zoho Books, or custom Excel.</p>
+                        <input type="file" id="purchase_register" name="purchase_register" accept=".xlsx,.csv" required class="w-full text-[12px] text-[#1d1d1f] file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                    </div>
+
+                    <!-- GSTR-2B from Portal -->
+                    <div class="p-6 rounded-[16px] border border-[#d2d2d7]/70 bg-[#fafafc] hover:bg-white transition">
+                        <div class="w-9 h-9 rounded-full bg-[#0071e3]/10 text-[#0071e3] flex items-center justify-center font-bold mb-3">
+                            <i data-lucide="cloud-download" class="w-4 h-4"></i>
+                        </div>
+                        <h3 class="text-[15px] font-semibold text-[#1d1d1f]">2. GSTR-2B (GST Portal)</h3>
+                        <p class="text-[12px] text-[#86868b] mt-1 mb-4">Downloaded from Returns Dashboard -> GSTR-2B (.json or .xlsx).</p>
+                        <input type="file" id="gstr2b_file" name="gstr2b_file" accept=".json,.xlsx" required class="w-full text-[12px] text-[#1d1d1f] file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-3 border-t border-[#f0f0f0]">
+                    <div class="flex items-center gap-2">
+                        <label class="text-[12px] text-[#86868b]">Matching Tolerance:</label>
+                        <input type="number" id="tolerance" name="tolerance" value="1.0" step="0.1" class="w-16 px-2.5 py-1 text-[13px] border border-[#d2d2d7] rounded-lg font-mono">
+                        <span class="text-[12px] text-[#86868b]">₹ (Rounding tolerance)</span>
+                    </div>
+
+                    <button type="submit" id="btn-reconcile" class="apple-btn-primary !bg-[#248a3d] hover:!bg-[#1e7333]">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span>Run Smart Match</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading -->
+        <div id="rec-loading" class="hidden py-16 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[#248a3d] border-t-transparent mb-3"></div>
+            <p class="text-[14px] text-[#86868b]">Normalizing invoice numbers, matching supplier GSTINs, and analyzing Rule 36(4) risks...</p>
+        </div>
+
+        <!-- Results Canvas -->
+        <div id="rec-results" class="hidden space-y-6">
+
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-[16px] border border-black/[0.04] shadow-sm text-center">
+                    <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Matched ITC</div>
+                    <div id="kpi-matched-itc" class="text-[22px] font-semibold text-[#34c759] mt-1 tracking-tight">₹0.00</div>
+                    <div id="kpi-matched-count" class="text-[11px] text-[#86868b] mt-1">0 invoices (100% Safe)</div>
+                </div>
+
+                <div class="bg-white p-5 rounded-[16px] border border-black/[0.04] shadow-sm text-center">
+                    <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Missing in 2B (At Risk)</div>
+                    <div id="kpi-missing-2b" class="text-[22px] font-semibold text-[#ff3b30] mt-1 tracking-tight">₹0.00</div>
+                    <div id="kpi-missing-2b-count" class="text-[11px] text-[#ff3b30] font-medium mt-1">0 invoices blocked under R.36(4)</div>
+                </div>
+
+                <div class="bg-white p-5 rounded-[16px] border border-black/[0.04] shadow-sm text-center">
+                    <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Amount Mismatch</div>
+                    <div id="kpi-mismatched" class="text-[22px] font-semibold text-[#ff9500] mt-1 tracking-tight">₹0.00</div>
+                    <div id="kpi-mismatched-count" class="text-[11px] text-[#86868b] mt-1">0 invoices with discrepancies</div>
+                </div>
+
+                <div class="bg-white p-5 rounded-[16px] border border-black/[0.04] shadow-sm text-center">
+                    <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Missing in Books</div>
+                    <div id="kpi-missing-books" class="text-[22px] font-semibold text-[#0071e3] mt-1 tracking-tight">₹0.00</div>
+                    <div id="kpi-missing-books-count" class="text-[11px] text-[#0071e3] font-medium mt-1">0 unclaimed invoices</div>
+                </div>
+            </div>
+
+            <!-- Conversion Funnel Upsell Box (Apple Dark Tile) -->
+            <div class="apple-tile-dark p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
+                <div>
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-[#2997ff] mb-1">E-Commerce Seller Suite</div>
+                    <h3 class="text-[20px] font-semibold text-white">Need to File Your E-Commerce GSTR-1 Too?</h3>
+                    <p class="text-[14px] text-[#86868b] mt-1 max-w-[500px]">
+                        Convert your Meesho, Amazon & Flipkart sales into GST Portal ready JSON in 30 seconds for just ₹149/month.
+                    </p>
+                </div>
+                <a href="/gstr1" class="apple-btn-primary !text-[14px] !py-2.5 !px-5 whitespace-nowrap">
+                    <span>Switch to GSTR-1 Auto-Filer</span>
+                    <span>›</span>
+                </a>
+            </div>
+
+            <!-- Tabbed Invoices -->
+            <div class="apple-card overflow-hidden">
+                <div class="border-b border-[#f0f0f0] p-4 flex items-center justify-between">
+                    <div class="apple-segmented-control" id="rec-tabs">
+                        <button onclick="switchTab('matched')" class="apple-segmented-item active" id="tab-btn-matched">Matched</button>
+                        <button onclick="switchTab('missing_2b')" class="apple-segmented-item" id="tab-btn-missing_2b">Missing in 2B</button>
+                        <button onclick="switchTab('mismatched')" class="apple-segmented-item" id="tab-btn-mismatched">Mismatched</button>
+                        <button onclick="switchTab('missing_books')" class="apple-segmented-item" id="tab-btn-missing_books">Missing in Books</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[13px] apple-table text-left">
+                        <thead class="bg-[#fafafc]">
+                            <tr>
+                                <th class="py-2.5 px-4">Supplier GSTIN</th>
+                                <th class="py-2.5 px-4">Supplier Name</th>
+                                <th class="py-2.5 px-4">Invoice No</th>
+                                <th class="py-2.5 px-4 text-right">Taxable Val (₹)</th>
+                                <th class="py-2.5 px-4 text-right">Tax Amount (₹)</th>
+                                <th class="py-2.5 px-4 text-center">Status / Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rec-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#f5f5f7] border-t border-[#d2d2d7]/50 text-[#86868b] text-[12px] py-8 px-4 mt-auto">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>GSTFlow · E-Commerce GST Compliance Engine</div>
+            <div class="flex gap-4">
+                <a href="/gstr1" class="hover:text-[#1d1d1f]">GSTR-1</a>
+                <a href="/tally" class="hover:text-[#1d1d1f]">Tally</a>
+                <a href="/reconcile" class="hover:text-[#1d1d1f]">2B Reconciler</a>
+                <a href="/pricing" class="hover:text-[#1d1d1f]">Pricing</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let reconciliationData = null;
+        let activeTab = 'matched';
+
+        function formatINR(val) {
+            return '₹' + Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function handleReconcileSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('reconcile-form');
+            const formData = new FormData(form);
+
+            document.getElementById('rec-loading').classList.remove('hidden');
+            document.getElementById('rec-results').classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/reconcile-gstr2b', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) throw new Error(await res.text());
+                reconciliationData = await res.json();
+                renderReconciliation(reconciliationData);
+            } catch (err) {
+                alert('Error running reconciliation: ' + err.message);
+            } finally {
+                document.getElementById('rec-loading').classList.add('hidden');
+            }
+        }
+
+        function loadMockReconciliation() {
+            reconciliationData = {
+                summary: {
+                    total_books_invoices: 28,
+                    total_2b_invoices: 26,
+                    matched_count: 22,
+                    mismatched_count: 2,
+                    missing_in_2b_count: 4,
+                    missing_in_books_count: 2,
+                    total_books_itc: 48920.00,
+                    total_2b_itc: 44100.00,
+                    matched_itc: 38450.00,
+                    missing_2b_itc_at_risk: 8640.00,
+                    unclaimed_itc_in_portal: 5650.00,
+                    itc_match_percentage: 78.6
+                },
+                matched: [
+                    { supplier_gstin: "07AAACB2154P1Z3", supplier_name: "SHARMA PACKAGING PVT LTD", invoice_number: "INV-2026-901", books_taxable: 45000, books_tax: 8100, itc_status: "100% Eligible" },
+                    { supplier_gstin: "07AABCE4128K1ZB", supplier_name: "DELHI CORRUGATED BOXES", invoice_number: "DCB/OCT/45", books_taxable: 25000, books_tax: 4500, itc_status: "100% Eligible" },
+                    { supplier_gstin: "07AAACK9981M1ZR", supplier_name: "AIRSPEED LOGISTICS SERVICES", invoice_number: "ASL-8821", books_taxable: 32000, books_tax: 5760, itc_status: "100% Eligible" }
+                ],
+                missing_in_2b: [
+                    { supplier_gstin: "07AAACR7712Q1ZX", supplier_name: "FAST TRACK COURIER PARTNERS", invoice_number: "FTC-1092", taxable_value: 28000, tax_amount: 5040, action: "Vendor Did Not File GSTR-1" },
+                    { supplier_gstin: "07AABCT5514F1ZM", supplier_name: "POLYTHENE & BAGS IMPEX", invoice_number: "PB-440", taxable_value: 20000, tax_amount: 3600, action: "Vendor Did Not File GSTR-1" }
+                ],
+                mismatched: [
+                    { supplier_gstin: "07AAACZ1122N1ZV", supplier_name: "GRAPHIC ART LABELS", invoice_number: "GAL-501", books_taxable: 12000, portal_taxable: 10000, books_tax: 2160, portal_tax: 1800, action: "₹360 Tax Discrepancy" }
+                ],
+                missing_in_books: [
+                    { supplier_gstin: "07AAACB9001R1ZQ", supplier_name: "CLOUD HOSTING & SOFTWARE", invoice_number: "AWS-OCT26", taxable_value: 15000, tax_amount: 2700, action: "Unclaimed Bill in Portal" }
+                ]
+            };
+            renderReconciliation(reconciliationData);
+        }
+
+        function renderReconciliation(data) {
+            const sum = data.summary;
+            document.getElementById('kpi-matched-itc').textContent = formatINR(sum.matched_itc);
+            document.getElementById('kpi-matched-count').textContent = `${sum.matched_count} invoices (100% Safe)`;
+
+            document.getElementById('kpi-missing-2b').textContent = formatINR(sum.missing_2b_itc_at_risk);
+            document.getElementById('kpi-missing-2b-count').textContent = `${sum.missing_in_2b_count} blocked under R.36(4)`;
+
+            document.getElementById('kpi-mismatched').textContent = formatINR(sum.mismatched_count > 0 ? 360 : 0);
+            document.getElementById('kpi-mismatched-count').textContent = `${sum.mismatched_count} discrepancies`;
+
+            document.getElementById('kpi-missing-books').textContent = formatINR(sum.unclaimed_itc_in_portal);
+            document.getElementById('kpi-missing-books-count').textContent = `${sum.missing_in_books_count} unclaimed invoices`;
+
+            switchTab('matched');
+            document.getElementById('rec-results').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            
+            // update segmented control active state
+            document.querySelectorAll('.apple-segmented-item').forEach(el => el.classList.remove('active'));
+            const activeBtn = document.getElementById(`tab-btn-${tab}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const tbody = document.getElementById('rec-tbody');
+            tbody.innerHTML = '';
+
+            let rows = [];
+            if (tab === 'matched') rows = reconciliationData.matched || [];
+            else if (tab === 'missing_2b') rows = reconciliationData.missing_in_2b || [];
+            else if (tab === 'mismatched') rows = reconciliationData.mismatched || [];
+            else if (tab === 'missing_books') rows = reconciliationData.missing_in_books || [];
+
+            rows.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-[#fafafc]';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-mono font-medium text-[13px] text-[#1d1d1f]">${r.supplier_gstin}</td>
+                    <td class="py-2.5 px-4 font-medium text-[13px] text-[#1d1d1f]">${r.supplier_name || 'N/A'}</td>
+                    <td class="py-2.5 px-4 font-mono text-[13px] text-[#86868b]">${r.invoice_number}</td>
+                    <td class="py-2.5 px-4 text-right font-mono text-[13px]">${formatINR(r.taxable_value || r.books_taxable)}</td>
+                    <td class="py-2.5 px-4 text-right font-mono font-semibold text-[13px]">${formatINR(r.tax_amount || r.books_tax)}</td>
+                    <td class="py-2.5 px-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-medium ${
+                            tab === 'matched' ? 'bg-[#34c759]/15 text-[#248a3d]' :
+                            tab === 'missing_2b' ? 'bg-[#ff3b30]/15 text-[#d70015]' :
+                            tab === 'mismatched' ? 'bg-[#ff9500]/15 text-[#c96000]' : 'bg-[#0071e3]/15 text-[#0071e3]'
+                        }">
+                            ${r.itc_status || r.action || 'OK'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

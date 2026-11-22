@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSTFlow | Automated E-Commerce GST & Tally Workflow Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/apple.css">
+</head>
+<body class="bg-white text-[#1d1d1f] antialiased min-h-screen flex flex-col selection:bg-[#0071e3] selection:text-white">
+
+    <!-- Apple-style Global Nav (44px) -->
+    <header class="sticky top-0 z-50 apple-frosted-nav">
+        <div class="max-w-[1024px] mx-auto px-4 h-11 flex items-center justify-between text-[12px] text-[#1d1d1f]/80">
+            <a href="/" class="flex items-center gap-2 text-[#1d1d1f] font-semibold tracking-tight text-[15px] hover:opacity-80 transition">
+                <i data-lucide="layers" class="w-4 h-4 text-[#0071e3]"></i>
+                <span>GSTFlow</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 font-normal">
+                <a href="/gstr1" class="hover:text-[#0071e3] transition">GSTR-1 Auto-Filer</a>
+                <a href="/tally" class="hover:text-[#0071e3] transition">Tally XML Sync</a>
+                <a href="/reconcile" class="hover:text-[#0071e3] transition flex items-center gap-1.5">
+                    <span>2B Reconciler</span>
+                    <span class="text-[10px] bg-[#34c759]/15 text-[#248a3d] font-medium px-2 py-0.5 rounded-full">Free</span>
+                </a>
+                <a href="/pricing" class="hover:text-[#0071e3] transition">Pricing</a>
+            </nav>
+
+            <div class="flex items-center gap-3">
+                <a href="/reconcile" class="hidden sm:inline-block text-[#0071e3] hover:underline text-[12px]">Try Free Funnel ›</a>
+                <a href="/gstr1" class="apple-btn-primary !py-1.5 !px-3.5 !text-[12px]">
+                    Start Filing
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Nav / Status strip -->
+    <div class="border-b border-[#f0f0f0] bg-[#fafafc] py-2.5 text-center text-[12px] text-[#86868b]">
+        <span>Compliant with GST Portal Offline Utility Version 3.1.6 · Supports Meesho, Amazon & Flipkart</span>
+    </div>
+
+    <!-- Hero Section (Light Canvas) -->
+    <section class="pt-20 pb-24 px-4 text-center max-w-[980px] mx-auto">
+        <div class="inline-flex items-center gap-2 text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-4">
+            <span>E-Commerce GST Compliance Engine</span>
+        </div>
+        
+        <h1 class="apple-hero text-[#1d1d1f] max-w-[850px] mx-auto">
+            Turn Marketplace Sales into <br class="hidden sm:inline">GSTR-1 & Tally XML in Seconds.
+        </h1>
+        
+        <p class="apple-lead mt-5 max-w-[680px] mx-auto">
+            Upload raw sales and return reports from Meesho, Amazon, or Flipkart. Spits out official GSTR-1 portal JSON, 9-sheet Excel, and Tally Prime vouchers.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/gstr1" class="apple-btn-primary !text-[15px] !py-3 !px-7 shadow-sm">
+                <span>Start GSTR-1 Generator</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </a>
+            <a href="/reconcile" class="apple-btn-secondary !text-[15px] !py-3 !px-7">
+                <span>Use Free 2B Reconciler</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-[#86868b]"></i>
+            </a>
+        </div>
+
+        <!-- Quick Proof Metrics -->
+        <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-[860px] mx-auto pt-10 border-t border-[#f0f0f0]">
+            <div class="text-center p-3">
+                <div class="text-[32px] font-semibold text-[#1d1d1f] tracking-tight">30s</div>
+                <div class="text-[13px] text-[#86868b] mt-0.5">Average Prep Time</div>
+            </div>
+            <div class="text-center p-3">
+                <div class="text-[32px] font-semibold text-[#1d1d1f] tracking-tight">100%</div>
+                <div class="text-[13px] text-[#86868b] mt-0.5">State POS Accuracy</div>
+            </div>
+            <div class="text-center p-3">
+                <div class="text-[32px] font-semibold text-[#0071e3] tracking-tight">GST 3.1.6</div>
+                <div class="text-[13px] text-[#86868b] mt-0.5">Portal Schema Ready</div>
+            </div>
+            <div class="text-center p-3">
+                <div class="text-[32px] font-semibold text-[#34c759] tracking-tight">₹0</div>
+                <div class="text-[13px] text-[#86868b] mt-0.5">Free 2B Funnel</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alternating Tile 1: Parchment Surface (The 3 Tools) -->
+    <section class="bg-[#f5f5f7] py-20 px-4">
+        <div class="max-w-[1024px] mx-auto">
+            <div class="text-center max-w-[640px] mx-auto mb-14">
+                <h2 class="apple-headline text-[#1d1d1f]">Designed for High-Volume Sellers.</h2>
+                <p class="apple-lead text-[17px] mt-2">Three focused paid tools, with the 2B reconciliation tool free as the entry funnel.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1: GSTR-1 Generator -->
+                <div class="apple-card p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[12px] font-semibold uppercase tracking-wider text-[#0071e3] mb-3">Tool 1 · Core</div>
+                        <h3 class="text-[24px] font-semibold text-[#1d1d1f] tracking-tight">GSTR-1 Auto-Filer</h3>
+                        <div class="text-[14px] text-[#86868b] mt-1 font-normal">₹149 / month</div>
+                        <p class="text-[15px] text-[#1d1d1f]/80 mt-4 leading-relaxed">
+                            Upload Meesho sales/returns, Amazon MTR CSV, and Flipkart reports. Automatically nets sales, computes POS, HSN sums, and document sequences.
+                        </p>
+                        <ul class="mt-6 space-y-2.5 text-[13px] text-[#1d1d1f]/70">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Table 7 B2CS State-wise POS</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Table 8 Nil Rated & Exempt</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Table 12 HSN Summary & UQC</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Table 14 ECO Section 52 TCS</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Official JSON & 9-Sheet Excel</li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-[#f0f0f0]">
+                        <a href="/gstr1" class="apple-link font-medium">
+                            <span>Open GSTR-1 Tool</span>
+                            <span>›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Tally XML Importer -->
+                <div class="apple-card p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[12px] font-semibold uppercase tracking-wider text-[#0071e3] mb-3">Tool 2 · Accounting</div>
+                        <h3 class="text-[24px] font-semibold text-[#1d1d1f] tracking-tight">Tally XML Sync</h3>
+                        <div class="text-[14px] text-[#86868b] mt-1 font-normal">₹249 / month</div>
+                        <p class="text-[15px] text-[#1d1d1f]/80 mt-4 leading-relaxed">
+                            Import thousands of marketplace transactions into Tally Prime or ERP 9 without manual data entry or company database bloating.
+                        </p>
+                        <ul class="mt-6 space-y-2.5 text-[13px] text-[#1d1d1f]/70">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> State POS consolidated vouchers</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Automatic Credit Notes for returns</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> TCS u/s 52 Asset Ledger mapping</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#0071e3]"></i> Tally Prime Alt+O XML ready</li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-[#f0f0f0]">
+                        <a href="/tally" class="apple-link font-medium">
+                            <span>Open Tally Importer</span>
+                            <span>›</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 3: Free Acquisition Funnel (GSTR-2B) -->
+                <div class="apple-card p-8 flex flex-col justify-between border-[#34c759]/30 relative overflow-hidden bg-white">
+                    <div class="absolute top-0 right-0 bg-[#34c759] text-white text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                        Free Funnel
+                    </div>
+                    <div>
+                        <div class="text-[12px] font-semibold uppercase tracking-wider text-[#248a3d] mb-3">Acquisition Funnel</div>
+                        <h3 class="text-[24px] font-semibold text-[#1d1d1f] tracking-tight">GSTR-2B Reconciler</h3>
+                        <div class="text-[14px] text-[#248a3d] mt-1 font-semibold">₹0 · Free Forever</div>
+                        <p class="text-[15px] text-[#1d1d1f]/80 mt-4 leading-relaxed">
+                            Compare your Purchase Register against portal GSTR-2B to safeguard Input Tax Credit (ITC) under Rule 36(4).
+                        </p>
+                        <ul class="mt-6 space-y-2.5 text-[13px] text-[#1d1d1f]/70">
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#34c759]"></i> Fuzzy invoice normalization</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#34c759]"></i> Supplier defaulter identification</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#34c759]"></i> Blocked ITC risk report download</li>
+                            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-[#34c759]"></i> Unlimited free reconciliations</li>
+                        </ul>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-[#f0f0f0]">
+                        <a href="/reconcile" class="apple-link font-medium !text-[#248a3d]">
+                            <span>Use Free Reconciler</span>
+                            <span>›</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alternating Tile 2: Dark Surface (Engineering & Compliance) -->
+    <section class="bg-[#161617] text-white py-24 px-4">
+        <div class="max-w-[1024px] mx-auto text-center">
+            <div class="text-[12px] font-medium uppercase tracking-wider text-[#2997ff] mb-3">Mathematical Rigor</div>
+            <h2 class="apple-headline text-white max-w-[700px] mx-auto">
+                Engineered to Eliminate Notice 88C & 88D Discrepancies.
+            </h2>
+            <p class="text-[17px] text-[#86868b] mt-4 max-w-[620px] mx-auto leading-relaxed">
+                Marketplace reports frequently have unassigned codes, return delays, and rounding variances. Our engine matches portal TCS Section 52 records down to the exact paisa.
+            </p>
+
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-left max-w-[900px] mx-auto">
+                <div class="border-t border-[#272729] pt-6">
+                    <div class="text-[17px] font-semibold text-white">Intra vs Inter Auto-Split</div>
+                    <p class="text-[14px] text-[#86868b] mt-2 leading-relaxed">
+                        Detects seller home state from GSTIN and automatically routes home state supplies to CGST + SGST and other states to IGST.
+                    </p>
+                </div>
+                <div class="border-t border-[#272729] pt-6">
+                    <div class="text-[17px] font-semibold text-white">HSN & UQC Serialization</div>
+                    <p class="text-[14px] text-[#86868b] mt-2 leading-relaxed">
+                        Groups multi-channel sales into valid 6-8 digit HSN codes, associates PCS-PIECES UQC, and balances quantity with total taxable values.
+                    </p>
+                </div>
+                <div class="border-t border-[#272729] pt-6">
+                    <div class="text-[17px] font-semibold text-white">Document Sequence Tracking</div>
+                    <p class="text-[14px] text-[#86868b] mt-2 leading-relaxed">
+                        Maintains invoice and credit note alphanumeric series (e.g. rw7a... for Meesho, IN-... for Amazon) for Table 13 compliance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alternating Tile 3: White Canvas (Funnel CTA) -->
+    <section class="py-24 px-4 text-center max-w-[780px] mx-auto">
+        <h2 class="apple-headline text-[#1d1d1f]">Ready to File This Month's GSTR-1?</h2>
+        <p class="apple-lead text-[17px] mt-3">Try the 1-click demo with our verified October 2026 dataset or upload your own files.</p>
+        
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/gstr1" class="apple-btn-primary !py-3 !px-7 !text-[15px]">
+                Launch GSTR-1 Auto-Filer
+            </a>
+            <a href="/pricing" class="apple-btn-secondary !py-3 !px-7 !text-[15px]">
+                View All Plans (from ₹149/mo)
+            </a>
+        </div>
+    </section>
+
+    <!-- Apple-style Minimal Footer (Canvas Parchment) -->
+    <footer class="bg-[#f5f5f7] border-t border-[#d2d2d7]/50 text-[#86868b] text-[12px] py-12 px-4 mt-auto">
+        <div class="max-w-[1024px] mx-auto space-y-6">
+            <div class="border-b border-[#d2d2d7]/50 pb-6 leading-relaxed">
+                <p>1. GSTR-1 JSON files are generated strictly conforming to GST Portal Offline Tool Schema Version 3.1.6.</p>
+                <p class="mt-1">2. GSTR-2B reconciliation is provided completely free for Indian sellers to ensure compliance with Rule 36(4) of the CGST Rules, 2017.</p>
+                <p class="mt-1">3. Tally Prime and Tally.ERP 9 are registered trademarks of Tally Solutions Pvt. Ltd. GSTFlow is an independent workflow automation utility.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    Copyright © 2026 GSTFlow Inc. Inspired by gsttool.in for Indian E-Commerce Merchants.
+                </div>
+                <div class="flex gap-6">
+                    <a href="/gstr1" class="hover:text-[#1d1d1f] transition">GSTR-1 Tool</a>
+                    <a href="/tally" class="hover:text-[#1d1d1f] transition">Tally XML</a>
+                    <a href="/reconcile" class="hover:text-[#1d1d1f] transition">2B Reconciler</a>
+                    <a href="/pricing" class="hover:text-[#1d1d1f] transition">Pricing</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

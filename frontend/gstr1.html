@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSTR-1 Excel & JSON Converter | GSTFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/apple.css">
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printable-report, #printable-report * { visibility: visible; }
+            #printable-report { position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#f5f5f7] text-[#1d1d1f] font-sans antialiased min-h-screen flex flex-col selection:bg-[#0071e3] selection:text-white">
+
+    <!-- Global Nav (44px) -->
+    <header class="sticky top-0 z-50 apple-frosted-nav no-print">
+        <div class="max-w-[1024px] mx-auto px-4 h-11 flex items-center justify-between text-[12px] text-[#1d1d1f]/80">
+            <a href="/" class="flex items-center gap-2 text-[#1d1d1f] font-semibold tracking-tight text-[15px] hover:opacity-80 transition">
+                <i data-lucide="layers" class="w-4 h-4 text-[#0071e3]"></i>
+                <span>GSTFlow</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 font-normal">
+                <a href="/gstr1" class="text-[#0071e3] font-medium">GSTR-1 Auto-Filer</a>
+                <a href="/tally" class="hover:text-[#0071e3] transition">Tally XML Sync</a>
+                <a href="/reconcile" class="hover:text-[#0071e3] transition flex items-center gap-1.5">
+                    <span>2B Reconciler</span>
+                    <span class="text-[10px] bg-[#34c759]/15 text-[#248a3d] font-medium px-2 py-0.5 rounded-full">Free</span>
+                </a>
+                <a href="/pricing" class="hover:text-[#0071e3] transition">Pricing</a>
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <span class="text-[11px] text-[#86868b]">Schema: GST 3.1.6</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Nav Frosted Strip (52px) -->
+    <div class="sticky top-11 z-40 bg-white/80 backdrop-blur-md border-b border-[#d2d2d7]/50 py-2.5 px-4 no-print">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-[18px] font-semibold tracking-tight text-[#1d1d1f]">GSTR-1 Auto-Filer</h1>
+                <div class="text-[12px] text-[#86868b]">Turn Meesho, Amazon & Flipkart reports into Portal JSON</div>
+            </div>
+            <div>
+                <button id="btn-load-demo" onclick="loadDemoOctober()" class="apple-btn-secondary !py-1.5 !px-4 !text-[13px] !bg-white hover:!bg-[#e8e8ed] shadow-sm">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-[#0071e3]"></i>
+                    <span>Load October Demo (1-Click)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-[1024px] mx-auto px-4 py-8 flex-1 w-full space-y-8">
+
+        <!-- Upload Form Card -->
+        <div class="apple-card p-6 md:p-8 no-print">
+            <h2 class="text-[18px] font-semibold tracking-tight text-[#1d1d1f] mb-5 flex items-center gap-2">
+                <i data-lucide="sliders" class="w-4 h-4 text-[#0071e3]"></i>
+                <span>Seller Parameters & Report Upload</span>
+            </h2>
+
+            <form id="gstr1-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                <!-- Metadata Inputs -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-1.5">Seller GSTIN</label>
+                        <input type="text" id="seller_gstin" name="seller_gstin" value="07FVUPP8356J1ZG" required class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] font-mono text-[14px] uppercase font-medium focus:bg-white focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-1.5">Filing Period (MMYYYY)</label>
+                        <input type="text" id="filing_period" name="filing_period" value="102026" required class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] font-mono text-[14px] font-medium focus:bg-white focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none transition" placeholder="e.g. 102026">
+                    </div>
+                    <div>
+                        <label class="block text-[12px] font-medium text-[#86868b] uppercase tracking-wider mb-1.5">TCS Auto-Alignment</label>
+                        <select id="align_with_tcs" name="align_with_tcs" class="w-full px-3.5 py-2 rounded-xl border border-[#d2d2d7] bg-[#fafafc] text-[14px] font-normal focus:bg-white focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] focus:outline-none transition">
+                            <option value="false">Standard (From Sales Reports)</option>
+                            <option value="true">Reconcile & Match Portal TCS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Marketplace Dropzones -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-[#f0f0f0]">
+                    <!-- Meesho -->
+                    <div class="p-4 rounded-xl border border-[#d2d2d7]/70 bg-[#fafafc] hover:bg-white transition space-y-2.5">
+                        <div class="flex items-center gap-2 text-[14px] font-semibold text-[#1d1d1f]">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span>
+                            <span>Meesho Reports</span>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">tcs_sales.xlsx</label>
+                            <input type="file" id="meesho_sales" name="meesho_sales" accept=".xlsx" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">tcs_sales_return.xlsx</label>
+                            <input type="file" id="meesho_returns" name="meesho_returns" accept=".xlsx" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">Tax_invoice_details.xlsx (Optional)</label>
+                            <input type="file" id="meesho_invoices" name="meesho_invoices" accept=".xlsx" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                    </div>
+
+                    <!-- Amazon -->
+                    <div class="p-4 rounded-xl border border-[#d2d2d7]/70 bg-[#fafafc] hover:bg-white transition space-y-2.5">
+                        <div class="flex items-center gap-2 text-[14px] font-semibold text-[#1d1d1f]">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                            <span>Amazon Reports</span>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">MTR B2C Report (.csv)</label>
+                            <input type="file" id="amazon_mtr" name="amazon_mtr" accept=".csv" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                        <p class="text-[11px] text-[#86868b] pt-1">Amazon Seller Central -> Tax Document Library -> Merchant Tax Report B2C.</p>
+                    </div>
+
+                    <!-- Flipkart or Portal TCS -->
+                    <div class="p-4 rounded-xl border border-[#d2d2d7]/70 bg-[#fafafc] hover:bg-white transition space-y-2.5">
+                        <div class="flex items-center gap-2 text-[14px] font-semibold text-[#1d1d1f]">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#0071e3]"></span>
+                            <span>Flipkart & Portal TCS</span>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">Flipkart Sales (.csv/.xlsx)</label>
+                            <input type="file" id="flipkart_sales" name="flipkart_sales" accept=".csv,.xlsx" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-[#86868b] block mb-1">Portal TCS (.zip / .xlsx)</label>
+                            <input type="file" id="portal_tcs" name="portal_tcs" accept=".zip,.xlsx" class="w-full text-[11px] text-[#1d1d1f] file:mr-2 file:py-1 file:px-2.5 file:rounded-full file:border-0 file:text-[11px] file:bg-[#e8e8ed] file:text-[#1d1d1f] hover:file:bg-[#d2d2d7]">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-[12px] text-[#86868b]">Click 'Load October Demo' above to test immediately without uploading.</span>
+                    <button type="submit" id="btn-submit" class="apple-btn-primary">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span>Generate GSTR-1</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="hidden py-16 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[#0071e3] border-t-transparent mb-3"></div>
+            <p class="text-[14px] text-[#86868b]">Aggregating state POS, calculating HSN sums, and assembling official GSTR-1 schemas...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-container" class="hidden space-y-6">
+
+            <!-- Download Action Bar -->
+            <div class="apple-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4 no-print">
+                <div class="flex items-center gap-3">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#34c759]"></span>
+                    <span class="font-medium text-[14px] text-[#1d1d1f]">GSTR-1 Generated Successfully</span>
+                    <span id="marketplaces-badge" class="text-[11px] bg-[#f5f5f7] text-[#86868b] font-medium px-2 py-0.5 rounded-full"></span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="downloadJson()" class="apple-btn-primary !py-2 !px-4 !text-[13px]">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                        <span>Download JSON (Portal Upload)</span>
+                    </button>
+                    <button onclick="downloadExcel()" class="apple-btn-secondary !py-2 !px-4 !text-[13px]">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-[#0071e3]"></i>
+                        <span>Download 9-Sheet Excel</span>
+                    </button>
+                    <button onclick="window.print()" class="apple-btn-secondary !py-2 !px-3 !text-[13px]">
+                        <i data-lucide="printer" class="w-3.5 h-3.5 text-[#86868b]"></i>
+                        <span>Print PDF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Report Card Canvas (Publication Grade Layout) -->
+            <div id="printable-report" class="apple-card p-8 md:p-10 bg-white">
+                <!-- Header -->
+                <div class="text-center pb-8 border-b border-[#f0f0f0]">
+                    <div class="text-[11px] font-semibold text-[#86868b] uppercase tracking-widest">Return Type: Monthly</div>
+                    <div class="text-[14px] font-medium text-[#1d1d1f] mt-1">GSTIN: <span id="rep-gstin" class="font-mono text-[#0071e3] font-semibold">07FVUPP8356J1ZG</span></div>
+                    <h2 class="text-[28px] font-semibold tracking-tight text-[#1d1d1f] mt-1">GSTR-1 Summary (Totals)</h2>
+                    <div class="text-[13px] text-[#86868b] mt-1">Report for the month of: <span id="rep-period" class="font-medium text-[#1d1d1f]">October (2026-27)</span></div>
+                </div>
+
+                <!-- 4 Top Cards (Apple Health/System Stat Style) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
+                    <div class="bg-[#f5f5f7] p-5 rounded-[16px] text-center border border-black/[0.02]">
+                        <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Taxable Sales</div>
+                        <div id="val-taxable-sales" class="text-[22px] font-semibold text-[#1d1d1f] mt-1 tracking-tight">₹0.00</div>
+                    </div>
+                    <div class="bg-[#f5f5f7] p-5 rounded-[16px] text-center border border-black/[0.02]">
+                        <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Total GST</div>
+                        <div id="val-total-gst" class="text-[22px] font-semibold text-[#0071e3] mt-1 tracking-tight">₹0.00</div>
+                    </div>
+                    <div class="bg-[#f5f5f7] p-5 rounded-[16px] text-center border border-black/[0.02]">
+                        <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Exempt / Nil Sales</div>
+                        <div id="val-exempt" class="text-[22px] font-semibold text-[#1d1d1f] mt-1 tracking-tight">₹0.00</div>
+                    </div>
+                    <div class="bg-[#f5f5f7] p-5 rounded-[16px] text-center border border-black/[0.02]">
+                        <div class="text-[11px] font-medium text-[#86868b] uppercase tracking-wider">Total Invoice Value</div>
+                        <div id="val-invoice-val" class="text-[22px] font-semibold text-[#34c759] mt-1 tracking-tight">₹0.00</div>
+                    </div>
+                </div>
+
+                <!-- Section Tables -->
+                <div class="space-y-6">
+
+                    <!-- Table 7: B2C Small -->
+                    <div class="border border-[#d2d2d7]/60 rounded-[14px] overflow-hidden">
+                        <div class="bg-[#fafafc] px-4 py-2.5 flex items-center justify-between border-b border-[#d2d2d7]/60">
+                            <span class="font-semibold text-[13px] text-[#1d1d1f]">7 · B2C (Small)</span>
+                            <span class="text-[11px] text-[#86868b]">Everyday sales to consumers (no GST number)</span>
+                        </div>
+                        <table class="w-full text-[13px] apple-table text-left">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th class="py-2 px-4">Records</th>
+                                    <th class="py-2 px-4 text-right">Taxable (₹)</th>
+                                    <th class="py-2 px-4 text-right">IGST (₹)</th>
+                                    <th class="py-2 px-4 text-right">CGST (₹)</th>
+                                    <th class="py-2 px-4 text-right">SGST (₹)</th>
+                                    <th class="py-2 px-4 text-right">Invoice (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="font-medium bg-white">
+                                    <td id="t7-records" class="py-2.5 px-4">50</td>
+                                    <td id="t7-taxable" class="py-2.5 px-4 text-right font-mono">₹3,41,843.13</td>
+                                    <td id="t7-igst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹14,257.28</td>
+                                    <td id="t7-cgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                    <td id="t7-sgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                    <td id="t7-invoice" class="py-2.5 px-4 text-right font-mono text-[#1d1d1f] font-semibold">₹3,56,901.70</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table 8: Nil Rated / Exempted -->
+                    <div class="border border-[#d2d2d7]/60 rounded-[14px] overflow-hidden">
+                        <div class="bg-[#fafafc] px-4 py-2.5 flex items-center justify-between border-b border-[#d2d2d7]/60">
+                            <span class="font-semibold text-[13px] text-[#1d1d1f]">8 · Nil Rated / Exempted / Non-GST</span>
+                            <span class="text-[11px] text-[#86868b]">Sales where no GST is charged</span>
+                        </div>
+                        <table class="w-full text-[13px] apple-table text-left">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th class="py-2 px-4">Description</th>
+                                    <th class="py-2 px-4 text-right">Nil Rated (₹)</th>
+                                    <th class="py-2 px-4 text-right">Exempted (₹)</th>
+                                    <th class="py-2 px-4 text-right">Non-GST (₹)</th>
+                                    <th class="py-2 px-4 text-right">Total (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="font-medium bg-white">
+                                    <td class="py-2.5 px-4">Outward supplies</td>
+                                    <td id="t8-nil" class="py-2.5 px-4 text-right font-mono">₹431.00</td>
+                                    <td class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹0.00</td>
+                                    <td class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹0.00</td>
+                                    <td id="t8-total" class="py-2.5 px-4 text-right font-mono font-semibold text-[#1d1d1f]">₹431.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table 12: HSN Summary -->
+                    <div class="border border-[#d2d2d7]/60 rounded-[14px] overflow-hidden">
+                        <div class="bg-[#fafafc] px-4 py-2.5 flex items-center justify-between border-b border-[#d2d2d7]/60">
+                            <span class="font-semibold text-[13px] text-[#1d1d1f]">12 · HSN Summary</span>
+                            <span class="text-[11px] text-[#86868b]">Sales grouped by product code & rate</span>
+                        </div>
+                        <table class="w-full text-[13px] apple-table text-left">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th class="py-2 px-4">Records</th>
+                                    <th class="py-2 px-4 text-right">Total Qty</th>
+                                    <th class="py-2 px-4 text-right">Taxable (₹)</th>
+                                    <th class="py-2 px-4 text-right">IGST (₹)</th>
+                                    <th class="py-2 px-4 text-right">CGST (₹)</th>
+                                    <th class="py-2 px-4 text-right">SGST (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="font-medium bg-white">
+                                    <td id="t12-records" class="py-2.5 px-4">17</td>
+                                    <td id="t12-qty" class="py-2.5 px-4 text-right font-mono">1,761.00</td>
+                                    <td id="t12-taxable" class="py-2.5 px-4 text-right font-mono">₹3,42,274.13</td>
+                                    <td id="t12-igst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹14,257.28</td>
+                                    <td id="t12-cgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                    <td id="t12-sgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table 13: Documents Issued -->
+                    <div class="border border-[#d2d2d7]/60 rounded-[14px] overflow-hidden">
+                        <div class="bg-[#fafafc] px-4 py-2.5 flex items-center justify-between border-b border-[#d2d2d7]/60">
+                            <span class="font-semibold text-[13px] text-[#1d1d1f]">13 · Documents Issued</span>
+                            <span class="text-[11px] text-[#86868b]">Invoice / credit note number ranges issued</span>
+                        </div>
+                        <table class="w-full text-[13px] apple-table text-left">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th class="py-2 px-4">Records</th>
+                                    <th class="py-2 px-4 text-right">Total Documents</th>
+                                    <th class="py-2 px-4 text-right">Cancelled</th>
+                                    <th class="py-2 px-4 text-right">Net Issued</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="font-medium bg-white">
+                                    <td id="t13-records" class="py-2.5 px-4">5</td>
+                                    <td id="t13-total" class="py-2.5 px-4 text-right font-mono">2,798</td>
+                                    <td class="py-2.5 px-4 text-right font-mono text-[#86868b]">0</td>
+                                    <td id="t13-net" class="py-2.5 px-4 text-right font-mono font-semibold">2,798</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table 14: ECO Section 52 -->
+                    <div class="border border-[#d2d2d7]/60 rounded-[14px] overflow-hidden">
+                        <div class="bg-[#fafafc] px-4 py-2.5 flex items-center justify-between border-b border-[#d2d2d7]/60">
+                            <span class="font-semibold text-[13px] text-[#1d1d1f]">14 · Supplies via E-Commerce Operators (u/s 52)</span>
+                            <span class="text-[11px] text-[#86868b]">Sales collected through e-commerce portals</span>
+                        </div>
+                        <table class="w-full text-[13px] apple-table text-left">
+                            <thead class="bg-white">
+                                <tr>
+                                    <th class="py-2 px-4">Records</th>
+                                    <th class="py-2 px-4 text-right">Net Value (₹)</th>
+                                    <th class="py-2 px-4 text-right">Integrated Tax (₹)</th>
+                                    <th class="py-2 px-4 text-right">Central Tax (₹)</th>
+                                    <th class="py-2 px-4 text-right">State/UT Tax (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="font-medium bg-white">
+                                    <td id="t14-records" class="py-2.5 px-4">2</td>
+                                    <td id="t14-val" class="py-2.5 px-4 text-right font-mono">₹3,42,274.13</td>
+                                    <td id="t14-igst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹14,257.28</td>
+                                    <td id="t14-cgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                    <td id="t14-sgst" class="py-2.5 px-4 text-right font-mono text-[#86868b]">₹400.66</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Footer of report -->
+                <div class="mt-8 pt-4 border-t border-[#f0f0f0] text-center text-[12px] text-[#86868b]">
+                    Generated by GSTFlow · Conforms to GST Offline Tool Schema Version 3.1.6
+                </div>
+            </div>
+
+            <!-- Tabbed Detail Breakdown (B2CS Table) -->
+            <div class="apple-card p-6 no-print">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-[#1d1d1f] text-[15px]">State-Wise B2CS Itemized Records</h3>
+                    <span class="text-[12px] text-[#86868b]">Sorted by POS State Code</span>
+                </div>
+                <div class="overflow-x-auto max-h-80 border border-[#d2d2d7]/50 rounded-[12px]">
+                    <table class="w-full text-[13px] apple-table text-left">
+                        <thead class="bg-[#fafafc] sticky top-0">
+                            <tr>
+                                <th class="py-2 px-3">Type</th>
+                                <th class="py-2 px-3">Place of Supply</th>
+                                <th class="py-2 px-3 text-center">Rate</th>
+                                <th class="py-2 px-3 text-right">Taxable Value</th>
+                                <th class="py-2 px-3 text-right">IGST</th>
+                                <th class="py-2 px-3 text-right">CGST</th>
+                                <th class="py-2 px-3 text-right">SGST</th>
+                            </tr>
+                        </thead>
+                        <tbody id="b2cs-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#f5f5f7] border-t border-[#d2d2d7]/50 text-[#86868b] text-[12px] py-8 px-4 mt-auto no-print">
+        <div class="max-w-[1024px] mx-auto flex items-center justify-between">
+            <div>GSTFlow · E-Commerce GST Compliance Engine</div>
+            <div class="flex gap-4">
+                <a href="/gstr1" class="hover:text-[#1d1d1f]">GSTR-1</a>
+                <a href="/tally" class="hover:text-[#1d1d1f]">Tally</a>
+                <a href="/reconcile" class="hover:text-[#1d1d1f]">2B Reconciler</a>
+                <a href="/pricing" class="hover:text-[#1d1d1f]">Pricing</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentSessionId = null;
+
+        function formatINR(val) {
+            return '₹' + Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function loadDemoOctober() {
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/load-demo-october', { method: 'POST' });
+                if (!res.ok) throw new Error(await res.text());
+                const data = await res.json();
+                renderResults(data);
+            } catch (err) {
+                alert('Error loading demo: ' + err.message);
+            } finally {
+                document.getElementById('loading-spinner').classList.add('hidden');
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('gstr1-form');
+            const formData = new FormData(form);
+
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/convert-gstr1', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Upload failed');
+                }
+                const data = await res.json();
+                renderResults(data);
+            } catch (err) {
+                alert('Processing Error: ' + err.message);
+            } finally {
+                document.getElementById('loading-spinner').classList.add('hidden');
+            }
+        }
+
+        function renderResults(data) {
+            currentSessionId = data.session_id;
+            const summary = data.summary;
+
+            document.getElementById('rep-gstin').textContent = summary.seller_gstin;
+            document.getElementById('rep-period').textContent = summary.filing_period;
+
+            document.getElementById('val-taxable-sales').textContent = formatINR(summary.taxable_sales);
+            document.getElementById('val-total-gst').textContent = formatINR(summary.total_gst);
+            document.getElementById('val-exempt').textContent = formatINR(summary.nil_rated);
+            document.getElementById('val-invoice-val').textContent = formatINR(summary.total_invoice_value);
+
+            // Table 7
+            document.getElementById('t7-records').textContent = summary.b2cs_records_count;
+            document.getElementById('t7-taxable').textContent = formatINR(summary.taxable_sales);
+            document.getElementById('t7-igst').textContent = formatINR(summary.igst);
+            document.getElementById('t7-cgst').textContent = formatINR(summary.cgst);
+            document.getElementById('t7-sgst').textContent = formatINR(summary.sgst);
+            document.getElementById('t7-invoice').textContent = formatINR(summary.taxable_sales + summary.total_gst);
+
+            // Table 8
+            document.getElementById('t8-nil').textContent = formatINR(summary.nil_rated);
+            document.getElementById('t8-total').textContent = formatINR(summary.nil_rated);
+
+            // Table 12
+            const totalQty = data.hsn.reduce((acc, curr) => acc + curr.qty, 0);
+            document.getElementById('t12-records').textContent = data.hsn.length;
+            document.getElementById('t12-qty').textContent = totalQty.toLocaleString('en-IN');
+            document.getElementById('t12-taxable').textContent = formatINR(summary.taxable_sales + summary.nil_rated);
+            document.getElementById('t12-igst').textContent = formatINR(summary.igst);
+            document.getElementById('t12-cgst').textContent = formatINR(summary.cgst);
+            document.getElementById('t12-sgst').textContent = formatINR(summary.sgst);
+
+            // Table 13
+            document.getElementById('t13-records').textContent = data.docs.length;
+            document.getElementById('t13-total').textContent = summary.total_docs_count.toLocaleString('en-IN');
+            document.getElementById('t13-net').textContent = summary.total_docs_count.toLocaleString('en-IN');
+
+            // Table 14
+            document.getElementById('t14-records').textContent = data.eco.length;
+            document.getElementById('t14-val').textContent = formatINR(summary.taxable_sales + summary.nil_rated);
+            document.getElementById('t14-igst').textContent = formatINR(summary.igst);
+            document.getElementById('t14-cgst').textContent = formatINR(summary.cgst);
+            document.getElementById('t14-sgst').textContent = formatINR(summary.sgst);
+
+            // Detailed B2CS table
+            const tbody = document.getElementById('b2cs-tbody');
+            tbody.innerHTML = '';
+            data.b2cs.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-[#fafafc]';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono text-[12px] text-[#86868b]">${row.typ}</td>
+                    <td class="py-2.5 px-3 font-medium text-[13px] text-[#1d1d1f]">${row.pos_name}</td>
+                    <td class="py-2.5 px-3 text-center text-[12px] font-semibold">${row.rt}%</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-[13px] font-medium">${formatINR(row.txval)}</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-[13px] text-[#86868b]">${formatINR(row.iamt)}</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-[13px] text-[#86868b]">${formatINR(row.camt)}</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-[13px] text-[#86868b]">${formatINR(row.samt)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('marketplaces-badge').textContent = data.marketplaces_processed.join(' + ');
+            document.getElementById('results-container').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function downloadJson() {
+            if (!currentSessionId) return;
+            window.location.href = `/api/download/gstr1-json?session_id=${currentSessionId}`;
+        }
+
+        function downloadExcel() {
+            if (!currentSessionId) return;
+            window.location.href = `/api/download/gstr1-excel?session_id=${currentSessionId}`;
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
