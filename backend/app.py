@@ -144,7 +144,7 @@ async def api_convert_gstr1(
             'docs': result['docs'],
             'eco': result['eco'],
             'marketplaces_processed': [r['marketplace'] for r in marketplace_results],
-            'tcs_portal_summary': tcs_portal_data.get('eco_summary') if tcs_portal_data else None
+            'tcs_portal_summary': tcs_portal_data.get('eco_summary') if tcs_portal_data else None if tcs_portal_data else None
         }
 
         return JSONResponse(response_data)
@@ -175,7 +175,12 @@ async def api_load_demo_october():
             seller_gstin=seller_gstin
         )
         amz_data = parse_amazon_mtr(amz_csv, seller_gstin=seller_gstin)
-        tcs_portal_data = parse_tcs_portal_file(tcs_zip)
+        tcs_portal_data = None
+        tcs_xlsx = os.path.join(oct_dir, "TCS data from GST portal", "07FVUPP8356J1ZG_OCT_2026.xlsx")
+        if os.path.exists(tcs_zip):
+            tcs_portal_data = parse_tcs_portal_file(tcs_zip)
+        elif os.path.exists(tcs_xlsx):
+            tcs_portal_data = parse_tcs_portal_file(tcs_xlsx)
 
         session_id = str(uuid.uuid4())
         excel_tmp = os.path.join(tempfile.gettempdir(), f"GSTR1_{seller_gstin}_monthly_{filing_period}_{session_id}.xlsx")
@@ -204,7 +209,7 @@ async def api_load_demo_october():
             'docs': result['docs'],
             'eco': result['eco'],
             'marketplaces_processed': ['Meesho', 'Amazon'],
-            'tcs_portal_summary': tcs_portal_data.get('eco_summary')
+            'tcs_portal_summary': tcs_portal_data.get('eco_summary') if tcs_portal_data else None
         })
 
     except Exception as e:

@@ -26,3 +26,4 @@ env/
 
 # Large archives (unzipped folders are preserved)
 *.zip
+!GST TOOL DATA _ 07FVUPP8356J1ZG/**/*.zip
